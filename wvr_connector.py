@@ -1,4 +1,4 @@
-from wvr_lite import queries
+import queries
 
 import pandas as pd
 import logging
@@ -11,6 +11,7 @@ pyodbc.pooling = True
 logger = logging.getLogger(__name__)
 R3S_DRIVER = "DRIVER={R³S Results Driver (*.wvr)};"
 
+
 def list_tables(wvr_file: str, model_name: str) -> pd.DataFrame:
     with wvr_connection_manager(wvr_file, model_name) as conn:
         table_frame = pd.read_sql(queries.select_table_name, conn)
@@ -18,6 +19,7 @@ def list_tables(wvr_file: str, model_name: str) -> pd.DataFrame:
             logger.error("There is no table")
 
         return table_frame
+
 
 def list_models(wvr_file: str) -> list[str]:
     with wvr_connection_manager(wvr_file, "Results info") as conn:
@@ -31,8 +33,12 @@ def wvr_connection_manager(wvr_path: str, model: str) -> Generator[pyodbc.Connec
     """Context manager for WVR database connections. Ensures proper cleanup."""
     logger.info("Successfully connected to WVR file.")
     conn = pyodbc.connect(__wvr_connection_string(wvr_path, model))
-    conn.add_output_converter(pyodbc.SQL_DECIMAL, lambda val: float(val) if val is not None else None)
-    conn.add_output_converter(pyodbc.SQL_NUMERIC, lambda val: float(val) if val is not None else None)
+    conn.add_output_converter(
+        pyodbc.SQL_DECIMAL, lambda val: float(val) if val is not None else None
+    )
+    conn.add_output_converter(
+        pyodbc.SQL_NUMERIC, lambda val: float(val) if val is not None else None
+    )
 
     try:
         yield conn

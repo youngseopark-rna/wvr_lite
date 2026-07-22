@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wvr_lite"
+version = "0.1.0"
+description = "WVR Lite SQLite ORM and Repository Suite"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "pandas",
+    "pyodbc",
+    "python-dotenv",
+    "pytest",
+    "ruff",
+    "sqlalchemy",
+    "sqlacodegen",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
