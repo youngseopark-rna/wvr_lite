@@ -1,6 +1,6 @@
 from environments import ALM_WVR_PATH, queries
 from tests import __handle_exception, logger
-from app import get_pivot, get_all_tables_in_wvr
+from wvr_convertor import get_pivot, get_all_tables_in_wvr
 
 import pytest
 

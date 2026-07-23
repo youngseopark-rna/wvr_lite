@@ -6,7 +6,7 @@ import pandas as pd
 import pytest
 
 from tests import __handle_exception
-from app import save_wvr_table_to_db_file
+from wvr_convertor import save_wvr_table_to_db_file
 from models import ReadOnlyModel, ReadOnlyError
 from repositories import BaseRepository
 

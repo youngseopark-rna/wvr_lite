@@ -1,4 +1,4 @@
-from app import export_all_wvr_to_db
+from wvr_convertor import export_all_wvr_to_db
 from environments import DB_PATH, SII_WVR_PATH, ALM_WVR_PATH
 from orm_convertor import convert_db_to_orm
 

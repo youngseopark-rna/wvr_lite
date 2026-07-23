@@ -2,7 +2,7 @@ import queries
 from environments import MAX_THREAD_WORKERS
 from wvr_connector import wvr_connection_manager, list_models, list_tables
 
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ProcessPoolExecutor, as_completed
 import sqlite3
 from pathlib import Path
 import pandas as pd
@@ -12,9 +12,13 @@ logger = logging.getLogger(__name__)
 
 
 def get_pivot(wvr_path: str, model_name: str, query: str) -> pd.DataFrame:
-    with wvr_connection_manager(wvr_path, model_name) as conn:
-        data_frame = pd.read_sql(query, conn)
-        pivot = data_frame.copy()
+    try:
+        with wvr_connection_manager(wvr_path, model_name) as conn:
+            data_frame = pd.read_sql(query, conn)
+            pivot = data_frame.copy()
+    except Exception as e:
+        logger.error(f"Error occured: {e}")
+        raise RuntimeError(f"Error occur from {get_pivot.__name__}") from e
 
     logger.info(f"{model_name} Pivot job is successed!")
     return pivot
@@ -24,7 +28,7 @@ def get_all_tables_in_wvr(wvr_path: str) -> dict:
     model_list = list_models(wvr_path)
     table_dict = dict()
 
-    with ThreadPoolExecutor(max_workers=MAX_THREAD_WORKERS) as executor:
+    with ProcessPoolExecutor(max_workers=MAX_THREAD_WORKERS) as executor:
         futures = {
             executor.submit(list_tables, wvr_path, model): model for model in model_list
         }
@@ -44,22 +48,6 @@ def get_all_tables_in_wvr(wvr_path: str) -> dict:
     return table_dict
 
 
-def save_wvr_table_to_db_file(wvr_path: str, db_path, model_name: str, table_name: str):
-    query = queries.select_all_datas(table_name)
-    logger.info(f"Query: {query}")
-    try:
-        pivot = get_pivot(wvr_path, model_name, query)
-        with sqlite3.connect(db_path) as conn:
-            result = pivot.to_sql(
-                name=table_name, con=conn, if_exists="replace", index=False
-            )
-        logger.info(f"Successfully written to {table_name}, {result}")
-    except Exception as e:
-        logger.error(f"Failed to export {model_name}.{table_name}: {e}")
-        return False
-    return True
-
-
 def export_all_wvr_to_db(wvr_path: str, output_dir: str = "db") -> bool:
     """Transfer all model and table data in the WVR file to the SQLite3.db file."""
     table_dict = get_all_tables_in_wvr(wvr_path)
@@ -69,23 +57,27 @@ def export_all_wvr_to_db(wvr_path: str, output_dir: str = "db") -> bool:
     output_path.mkdir(parents=True, exist_ok=True)
 
     db_path = output_path / f"{Path(wvr_path).stem}.db"
+    logger.info(f"DB Path: {db_path}")
     for model_name, tables in table_dict.items():
-        if db_path.is_file():
-            logger.info(f"Skip the logic as the file exists: {db_path.name}")
-            continue
-        logger.info(f"DB Path: {db_path}")
-
-        with ThreadPoolExecutor(max_workers=MAX_THREAD_WORKERS) as executor:
-            futures = [
-                executor.submit(
-                    save_wvr_table_to_db_file, wvr_path, db_path, model_name, table
+        with ProcessPoolExecutor(max_workers=MAX_THREAD_WORKERS) as executor:
+            pivot_futures = {
+                table: executor.submit(
+                    get_pivot, wvr_path, model_name, queries.select_all_datas(table)
                 )
                 for table in tables
-            ]
+            }
 
-            for future in futures:
-                if not future.result():
-                    logger.error("Saving wvr file failed")
+            for table, future in pivot_futures.items():
+                pivot = future.result()
+
+                if pivot is None:
+                    logger.error(f"Failed to get pivot from {model_name}")
                     return False
+
+                with sqlite3.connect(db_path) as conn:
+                    result = pivot.to_sql(
+                        name=table, con=conn, if_exists="replace", index=False
+                    )
+                logger.info(f"Successfully written to {table}, {result}")
 
     return True
