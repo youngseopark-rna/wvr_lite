@@ -7,8 +7,9 @@ name = "wvr_lite"
 version = "0.1.0"
 description = "WVR Lite SQLite ORM and Repository Suite"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.14"
 dependencies = [
+    "dotenv",
     "pandas",
     "pyodbc",
     "python-dotenv",
@@ -16,10 +17,14 @@ dependencies = [
     "ruff",
     "sqlalchemy",
     "sqlacodegen",
+    "fastapi",
+    "uvicorn",
+    "aiosqlite",
 ]
 
 [tool.setuptools.packages.find]
 where = ["."]
 
 [tool.pytest.ini_options]
+pythonpath = ["."]
 testpaths = ["tests"]

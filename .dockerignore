@@ -1,0 +1,11 @@
+__pycache__/
+.agents/
+.pytest_cache/
+.ruff_cache/
+.venv/
+build/
+tests/
+*.egg-info/
+.git
+.gitignore
+README.md
