@@ -1,0 +1,12 @@
+services:
+  wvr-lite:
+    build: .
+    container_name: "wvr-lite"
+    ports:
+      - 8080:8080
+    networks:
+      - mcp-network
+
+networks:
+  mcp-network:
+    driver: bridge
