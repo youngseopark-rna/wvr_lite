@@ -1,28 +1,34 @@
-from wvr_convertor import export_all_wvr_to_db
-from environments import DB_PATH, SII_WVR_PATH, ALM_WVR_PATH
-from orm_convertor import convert_db_to_orm
+from util.wvr_convertor import export_all_wvr_to_db
+from util.wvr_connector import find_out_wvr_paths
+from config.environments import DB_PATH
+from util.orm_convertor import convert_db_to_orm
 
 import logging
-import sys
-
-root_logger = logging.getLogger()
-root_logger.setLevel(logging.INFO)
-
-if not root_logger.handlers:
-    handler = logging.StreamHandler(sys.stdout)
-    handler.setFormatter(logging.Formatter("[%(levelname)s] %(asctime)s - %(message)s"))
-    root_logger.addHandler(handler)
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
-if __name__ == "__main__":
-    logger.info("Convert SII wvr files to .db for SQLite")
-    if export_all_wvr_to_db(SII_WVR_PATH, DB_PATH):
-        logger.info("SII DB Migration to SQLite Done! Check out the directory")
+def convert_wvr_to_orm():
+    # 1. find out all the wvr file paths
+    logger.info("Find out all the wvr file paths from the wvr directory")
+    wvr_paths = find_out_wvr_paths()
+    logger.info(f"{len(wvr_paths)} files are detected")
+    if len(wvr_paths) == 0:
+        logger.warn("There is no wvr files changed, so the process will be deprecated")
+        return
+    
 
-    logger.info("Convert ALM wvr files to .db for SQLite")
-    if export_all_wvr_to_db(ALM_WVR_PATH, DB_PATH):
-        logger.info("ALM DB Migration to SQLite Done! Check out the directory")
+    # 2. convert .wvr -> .db for SQLite
+    logger.info("Convert all .wvr files -> .db for SQLite")
+    for wvr_path in wvr_paths:
+        if export_all_wvr_to_db(wvr_path, DB_PATH):
+            logger.info(f"#{wvr_paths.index(wvr_path)} Migration Done! Check out the directory")
+        else:
+            logger.error("Something goes wrong")
+            raise RuntimeError("Something goes wrong while export the wvr to db")
 
+    # 3. convert .db files to sqlalchem.Table
     if convert_db_to_orm():
         logger.info("Converting db into ORM completed")
+
+if __name__ == "__main__":
+    logger.info("Convert wvr -> orm. Scripts Started")
+    convert_wvr_to_orm()

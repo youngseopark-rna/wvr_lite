@@ -1,8 +1,8 @@
 from pathlib import Path
 import logging
 
-from environments import DB_PATH
-from database import get_db_session_by_name
+from config.environments import DB_PATH
+from config.database import get_db_session_by_name
 from repositories.table_repository import GenericReadOnlyTableRepository
 
 

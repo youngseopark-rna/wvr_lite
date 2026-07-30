@@ -6,7 +6,13 @@ services:
       - 8080:8080
     networks:
       - mcp-network
+    # volumes:
+    #   - database:/app/db
 
 networks:
   mcp-network:
-    driver: bridge
+    external: true
+    name: mcp_mcp-network
+
+# volumes:
+#   database:

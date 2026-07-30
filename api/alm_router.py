@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 import logging
 
-from dependencies import get_alm_service
+from config.dependencies import get_alm_service
 from service.alm_service import AlmService
 
 logger = logging.getLogger(__name__)

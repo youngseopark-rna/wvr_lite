@@ -1,6 +1,6 @@
-import queries
-from environments import MAX_THREAD_WORKERS
-from wvr_connector import wvr_connection_manager, list_models, list_tables
+import util.queries as queries
+from config.environments import MAX_THREAD_WORKERS
+from util.wvr_connector import wvr_connection_manager, list_models, list_tables
 
 from concurrent.futures import ProcessPoolExecutor, as_completed
 import sqlite3

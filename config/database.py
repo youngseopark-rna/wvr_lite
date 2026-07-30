@@ -1,4 +1,4 @@
-from environments import DB_PATH
+from config.environments import DB_PATH
 
 from pathlib import Path
 from typing import AsyncGenerator

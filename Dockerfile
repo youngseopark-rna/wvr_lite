@@ -32,6 +32,8 @@ FROM python:3.14-alpine AS runner
 # 작업 디렉토리 설정
 WORKDIR /app
 
+RUN apk add --no-cache unixodbc
+
 # 빌드 단계에서 생성된 가상환경(venv)만 복사하여 이미지 용량 최적화
 COPY --from=builder /opt/venv /opt/venv
 
@@ -47,5 +49,4 @@ COPY . .
 EXPOSE 8080
 
 # 컨테이너 실행 시 가상환경 내의 python으로 
-
 CMD ["python", "-m", "main"]

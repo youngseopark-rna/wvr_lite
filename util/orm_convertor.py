@@ -1,4 +1,4 @@
-from environments import MAX_PROCESS_WORKERS
+from config.environments import MAX_PROCESS_WORKERS
 
 from concurrent.futures import ProcessPoolExecutor, as_completed
 import subprocess

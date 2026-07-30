@@ -1,5 +1,8 @@
-import queries
+import util.queries as queries
+from config.environments import WVR_DIR_PATH, R3S_DRIVER
 
+import time
+from pathlib import Path
 import pandas as pd
 import logging
 import pathlib
@@ -9,8 +12,6 @@ import pyodbc
 
 pyodbc.pooling = True
 logger = logging.getLogger(__name__)
-R3S_DRIVER = "DRIVER={R³S Results Driver (*.wvr)};"
-
 
 def list_tables(wvr_file: str, model_name: str) -> pd.DataFrame:
     with wvr_connection_manager(wvr_file, model_name) as conn:
@@ -45,6 +46,18 @@ def wvr_connection_manager(wvr_path: str, model: str) -> Generator[pyodbc.Connec
     finally:
         conn.close()
 
+def find_out_wvr_paths() -> list[str]:
+    wvr_dir_path = Path(WVR_DIR_PATH)
+    pattern = "*.wvr"
+
+    wvr_paths = list()
+    time_threshold = time.time() - (24 * 3600) # before one day
+    for p in wvr_dir_path.glob(pattern):
+        if p.is_file() and p.stat().st_mtime >= time_threshold:
+            logger.info(f"Found recently modified wvr file: {p.name}")
+            wvr_paths.append(str(p))
+
+    return wvr_paths
 
 def __wvr_connection_string(wvr_path: str, model: str) -> str:
     if not wvr_path or not model:

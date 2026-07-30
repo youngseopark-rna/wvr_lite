@@ -60,7 +60,7 @@ class GenericReadOnlyTableRepository:
             elif isinstance(col, ClauseElement):
                 resolved.append(col)
             else:
-                raise ValueError(f"유효하지 않은 컬럼/표현식 타입입니다: {type(col)}")
+                raise ValueError(f"Unvalid column/exp type: {type(col)}")
         return resolved
 
     def get_table(self, table_name: str) -> Table:
