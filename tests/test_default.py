@@ -12,6 +12,7 @@ import pytest
 IS_SUCCESS = True
 ALM_DB = "ALM_DashBoard_20260424"
 
+
 @pytest.mark.skip(reason="Success")
 @__handle_exception(is_success=IS_SUCCESS)
 def test_get_all_tables():
@@ -54,6 +55,7 @@ async def test_table_repository():
     finally:
         await async_session_gen.aclose()
 
+
 @pytest.mark.skip(reason="Success")
 @pytest.mark.asyncio
 async def test_alm_service():
@@ -74,6 +76,7 @@ async def test_alm_service():
             logger.info(f"{db} Result: {query}")
 
     await test_alm_service_get_datas_from_table()
+
 
 @pytest.mark.skip(reason="Success")
 @__handle_exception(is_success=IS_SUCCESS)

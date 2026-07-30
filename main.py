@@ -14,6 +14,7 @@ app = FastAPI(
 # 2. 분리한 라우터 등록
 app.include_router(alm_router)
 
+
 # 3. 헬스체크용 루트 엔드포인트
 @app.get("/")
 async def root():

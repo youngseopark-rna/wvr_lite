@@ -13,12 +13,15 @@ alm_service_instance: AlmService | None = None
 async def lifespan(app: FastAPI):
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.INFO)
-    
+
     root_logger.handlers = []
-    
+
     handler = logging.StreamHandler(sys.stdout)
     handler.setFormatter(
-        logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+        logging.Formatter(
+            "%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
+        )
     )
     root_logger.addHandler(handler)
 
@@ -26,7 +29,7 @@ async def lifespan(app: FastAPI):
         current_logger = logging.getLogger(logger_name)
         current_logger.disabled = False
         current_logger.propagate = True
-        
+
     logger.info("====================================================")
     logger.info("📢 All custom loggers successfully activated & centralized!")
     logger.info("====================================================")
