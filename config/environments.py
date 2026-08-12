@@ -12,6 +12,7 @@ ALM_WVR_PATH = os.environ.get("ALM_WVR_PATH")
 SII_WVR_PATH = os.environ.get("SII_WVR_PATH")
 DB_PATH = ENV_DIR / "db"
 R3S_DRIVER = "DRIVER={R³S Results Driver (*.wvr)};"
+ALM_MODEL_SCEN = "ALM_Model_Scen"
 DIVIDED_UNIT_1 = 1_000_000
 MAX_THREAD_WORKERS = 60
 MAX_PROCESS_WORKERS = 12

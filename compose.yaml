@@ -6,7 +6,8 @@ services:
       - 8080:8080
     networks:
       - mcp-network
-    # volumes:
+    volumes:
+      - ./logs:/app/logs
     #   - database:/app/db
 
 networks:

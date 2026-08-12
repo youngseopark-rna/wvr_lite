@@ -1,11 +1,12 @@
-from config.environments import ALM_WVR_PATH
+from config.environments import ALM_WVR_PATH, ALM_MODEL_SCEN
 import util.queries as queries
 from tests import __handle_exception, logger
 from util.wvr_convertor import get_pivot, get_all_tables_in_wvr
 from util.wvr_connector import find_out_wvr_paths
 from repositories.table_repository import GenericReadOnlyTableRepository
+from repositories.auto_repository import AutoDetectedReadOnlyRepository
 from service.alm_service import AlmService
-from config.database import get_db_session_by_name
+from config.database import get_db_session_by_name, get_db_engine_by_alchemy
 
 import pytest
 
@@ -83,3 +84,16 @@ async def test_alm_service():
 def test_finding_wvr_paths():
     wvr_paths = find_out_wvr_paths()
     logger.info(f"wvr paths: \n{wvr_paths}")
+
+
+@__handle_exception(is_success=IS_SUCCESS)
+def test_autodection_of_tables():
+    engine = get_db_engine_by_alchemy(ALM_WVR_PATH, ALM_MODEL_SCEN)
+    repo = AutoDetectedReadOnlyRepository.create(engine=engine)
+    session = repo.session
+    a_company = repo.base.classes["A_Company"]
+    table = session.query(a_company).first()
+
+    logger.info(f"Example table: \n{table}")
+
+    assert table is not None

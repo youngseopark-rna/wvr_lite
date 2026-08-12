@@ -1,9 +1,9 @@
 from contextlib import asynccontextmanager
 from service.alm_service import AlmService
 from util.batch_scheduler import set_batch_job_scheduler
+from util.log_handler import set_root_logger
 from fastapi import FastAPI
 import logging
-import sys
 
 logger = logging.getLogger(__name__)
 alm_service_instance: AlmService | None = None
@@ -11,29 +11,8 @@ alm_service_instance: AlmService | None = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    root_logger = logging.getLogger()
-    root_logger.setLevel(logging.INFO)
-
-    root_logger.handlers = []
-
-    handler = logging.StreamHandler(sys.stdout)
-    handler.setFormatter(
-        logging.Formatter(
-            "%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-            datefmt="%Y-%m-%d %H:%M:%S",
-        )
-    )
-    root_logger.addHandler(handler)
-
-    for logger_name in logging.root.manager.loggerDict:
-        current_logger = logging.getLogger(logger_name)
-        current_logger.disabled = False
-        current_logger.propagate = True
-
-    logger.info("====================================================")
-    logger.info("📢 All custom loggers successfully activated & centralized!")
-    logger.info("====================================================")
-    # ====================================================
+    logger.info("[Logger] Set up the root logger and volumes")
+    set_root_logger()
     logger.info("[Server] Starting up FastAPI Application...")
 
     batch_job_scheduler = set_batch_job_scheduler()
