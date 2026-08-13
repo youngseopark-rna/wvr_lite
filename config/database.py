@@ -4,15 +4,20 @@ from pathlib import Path
 from typing import AsyncGenerator
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy import create_engine
-
+from sqlalchemy.dialects.mssql.base import MSDialect
 import logging
 
 logger = logging.getLogger(__name__)
 _engines = {}
 
+MSDialect._get_default_schema_name = lambda self, connection: "dbo"
+MSDialect._get_server_version_info = lambda self, connection: (15, 0, 0) # MS SQL Server 2019
+
 """
 Connection for WVR -> Lite convertor
 """
+
+
 def get_engine(db_name: str):
     if db_name not in _engines:
         db_file_path = Path(DB_PATH) / f"{db_name}.db"
@@ -31,17 +36,19 @@ async def get_db_session_by_name(db_name: str) -> AsyncGenerator[AsyncSession, N
     async with session_factory() as session:
         yield session
 
+
 """
 DB Connection for using ORM with SQLAlchemy
 """
+
+
 def get_db_engine_by_alchemy(wvr_path: str, model: str):
     logger.info(f"Start to connect {wvr_path}, model: {model}")
 
     # create db engine
-    try: 
+    try:
         engine = create_engine(
-            "mssql+pyodbc://", 
-            creator=lambda: _wvr_connection_string(wvr_path, model)
+            "mssql+pyodbc://", creator=lambda: _init_wvr_connection(wvr_path, model)
         )
         logger.info(f"Successfully created db engine {engine}")
 
@@ -51,7 +58,7 @@ def get_db_engine_by_alchemy(wvr_path: str, model: str):
         raise RuntimeError from e
 
 
-def _wvr_connection_string(wvr_path: str, model: str) -> pyodbc.Connection:
+def _init_wvr_connection(wvr_path: str, model: str) -> pyodbc.Connection:
     if not wvr_path or not model:
         raise ValueError("Both wvr_path and model must be provided.")
 
@@ -63,8 +70,12 @@ def _wvr_connection_string(wvr_path: str, model: str) -> pyodbc.Connection:
 
     try:
         conn = pyodbc.connect(raw_odbc_str)
-        conn.add_output_converter(pyodbc.SQL_DECIMAL, lambda val: float(val) if val is not None else None)
-        conn.add_output_converter(pyodbc.SQL_NUMERIC, lambda val: float(val) if val is not None else None)
+        conn.add_output_converter(
+            pyodbc.SQL_DECIMAL, lambda val: float(val) if val is not None else None
+        )
+        conn.add_output_converter(
+            pyodbc.SQL_NUMERIC, lambda val: float(val) if val is not None else None
+        )
         logger.info(f"Successfully connected to the odbc driver: {conn}")
 
         return conn

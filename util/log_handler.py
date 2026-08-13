@@ -1,7 +1,9 @@
 import logging
 import os
 import sys
+
 logger = logging.getLogger(__name__)
+
 
 def set_root_logger():
     root_logger = logging.getLogger()
