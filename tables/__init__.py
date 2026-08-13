@@ -9,6 +9,7 @@ VALUE_MARKET = "Value_Market"
 
 Base = declarative_base()
 
+
 class BaseModel(Base):
     __abstract__ = True
 

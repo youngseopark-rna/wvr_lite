@@ -1,6 +1,6 @@
 from config.environments import ALM_WVR_PATH, ALM_MODEL_SCEN
 from tables.mv_distribution_tables import A_Company
-from tables import BE_LIABILITY, STEP_DATE, ALM_SCENARIO, A_COMPANY, STEP_DATE, VALUE_MARKET
+from tables import BE_LIABILITY, ALM_SCENARIO, A_COMPANY, STEP_DATE, VALUE_MARKET
 import util.queries as queries
 from tests import __handle_exception, logger
 from util.wvr_convertor import get_pivot, get_all_tables_in_wvr
@@ -10,9 +10,11 @@ from repositories.auto_repository import AutoDetectedReadOnlyRepository
 from service.alm_service import AlmService
 import pandas as pd
 import pyodbc
-from config.database import get_db_session_by_name, get_db_engine_by_alchemy, _init_wvr_connection
-from sqlalchemy.orm import declarative_base
-from sqlalchemy import Column, String, Float, DateTime
+from config.database import (
+    get_db_session_by_name,
+    get_db_engine_by_alchemy,
+    _init_wvr_connection,
+)
 
 import pytest
 
@@ -91,6 +93,7 @@ def test_finding_wvr_paths():
     wvr_paths = find_out_wvr_paths()
     logger.info(f"wvr paths: \n{wvr_paths}")
 
+
 @pytest.mark.skip(reason="Success")
 @__handle_exception(is_success=IS_SUCCESS)
 def test_autodection_of_tables():
@@ -100,10 +103,18 @@ def test_autodection_of_tables():
 
     table = None
     try:
-        table = session.query(A_Company).filter(A_Company.step_date >= "2024-12-31", A_Company.step_date <= "2025-10-31").all()
+        table = (
+            session.query(A_Company)
+            .filter(
+                A_Company.step_date >= "2024-12-31", A_Company.step_date <= "2025-10-31"
+            )
+            .all()
+        )
 
         for row in table:
-            logger.info(f"Step Date: {row.step_date}, BE Liability: {row.be_liability}, Value Market: {row.value_market}, ALM Scenario: {row.alm_scenario}")
+            logger.info(
+                f"Step Date: {row.step_date}, BE Liability: {row.be_liability}, Value Market: {row.value_market}, ALM Scenario: {row.alm_scenario}"
+            )
     except Exception as e:
         logger.exception("Error occurred while quering A_Company table")
         raise RuntimeError from e
@@ -112,14 +123,22 @@ def test_autodection_of_tables():
 
     assert table is not None
 
+
 @__handle_exception(is_success=IS_SUCCESS)
 def test_pyodbc_connection():
     try:
         conn = _init_wvr_connection(ALM_WVR_PATH, ALM_MODEL_SCEN)
-        conn.add_output_converter(pyodbc.SQL_DECIMAL, lambda val: float(val) if val is not None else None)
-        conn.add_output_converter(pyodbc.SQL_NUMERIC, lambda val: float(val) if val is not None else None)
+        conn.add_output_converter(
+            pyodbc.SQL_DECIMAL, lambda val: float(val) if val is not None else None
+        )
+        conn.add_output_converter(
+            pyodbc.SQL_NUMERIC, lambda val: float(val) if val is not None else None
+        )
 
-        data_frame  = pd.read_sql(f"SELECT [{VALUE_MARKET}], [{BE_LIABILITY}], [{STEP_DATE}], [{ALM_SCENARIO}] FROM [{A_COMPANY}] WHERE [{STEP_DATE}] BETWEEN '2024-12-31' AND '2025-10-31'", conn)
+        data_frame = pd.read_sql(
+            f"SELECT [{VALUE_MARKET}], [{BE_LIABILITY}], [{STEP_DATE}], [{ALM_SCENARIO}] FROM [{A_COMPANY}] WHERE [{STEP_DATE}] BETWEEN '2024-12-31' AND '2025-10-31'",
+            conn,
+        )
 
         logger.info(f"Data frame: \n{data_frame}")
     except Exception as e:

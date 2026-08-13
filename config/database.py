@@ -11,7 +11,11 @@ logger = logging.getLogger(__name__)
 _engines = {}
 
 MSDialect._get_default_schema_name = lambda self, connection: "dbo"
-MSDialect._get_server_version_info = lambda self, connection: (15, 0, 0) # MS SQL Server 2019
+MSDialect._get_server_version_info = lambda self, connection: (
+    15,
+    0,
+    0,
+)  # MS SQL Server 2019
 
 """
 Connection for WVR -> Lite convertor

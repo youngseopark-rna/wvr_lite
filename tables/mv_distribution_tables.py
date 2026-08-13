@@ -1,5 +1,13 @@
-from sqlalchemy import Column, String, Float, Integer, DateTime
-from tables import BaseModel, ALM_SCENARIO, A_COMPANY, STEP_DATE, ASSETS_TOTAL, BE_LIABILITY, VALUE_MARKET
+from sqlalchemy import Column, Float, Integer, DateTime
+from tables import (
+    BaseModel,
+    ALM_SCENARIO,
+    A_COMPANY,
+    STEP_DATE,
+    BE_LIABILITY,
+    VALUE_MARKET,
+)
+
 
 class A_Company(BaseModel):
     __tablename__ = A_COMPANY
