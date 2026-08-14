@@ -9,7 +9,8 @@ from repositories.table_repository import GenericReadOnlyTableRepository
 from repositories.auto_repository import AutoDetectedReadOnlyRepository
 from service.alm_service import AlmService
 import pandas as pd
-import pyodbc
+import pyodbc 
+from pypika import Query, Table, Field
 from config.database import (
     get_db_session_by_name,
     get_db_engine_by_alchemy,
@@ -123,7 +124,6 @@ def test_autodection_of_tables():
 
     assert table is not None
 
-
 @__handle_exception(is_success=IS_SUCCESS)
 def test_pyodbc_connection():
     try:
@@ -135,8 +135,17 @@ def test_pyodbc_connection():
             pyodbc.SQL_NUMERIC, lambda val: float(val) if val is not None else None
         )
 
+        table = Table('A_Company')
+
+        query = (
+            Query.from_(table)
+            .select(table[f"{BE_LIABILITY}"], table[f"{STEP_DATE}"], table[f"{VALUE_MARKET}"], table[f"{ALM_SCENARIO}"])
+            .where(table[f"{STEP_DATE}"] <= '2025-10-31')
+            .orderby(table[f"{ALM_SCENARIO}"])
+        )
+
         data_frame = pd.read_sql(
-            f"SELECT [{VALUE_MARKET}], [{BE_LIABILITY}], [{STEP_DATE}], [{ALM_SCENARIO}] FROM [{A_COMPANY}] WHERE [{STEP_DATE}] BETWEEN '2024-12-31' AND '2025-10-31'",
+            query.get_sql(),
             conn,
         )
 
